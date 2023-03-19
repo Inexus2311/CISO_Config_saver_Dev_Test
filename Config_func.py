@@ -9,18 +9,62 @@ import argparse
 # Menu mode
 # mode = ""
 
-"# Functions"
+# **************************************************#
+# Functions
+# **************************************************#
+
+
+# **************************************************#
+# Failed checking Input close Program
+# **************************************************#
+
+
+def Close():
+    print("Program occurs an error! Closing Program now!")
+    sys.exit()
+
+
+# **************************************************#
+# Check bad input characters
+# **************************************************#
+
+
+def bad_input(user_input):
+    # define set of invalid characters
+    bad_chars = {'&', '|', ';', '$', '>', '<', '\\', '!', "'", '--', '-'}
+    # check if_user input contains only valid characters
+    if any(c in bad_chars for c in user_input):
+        return True
+    else:
+        return False
+
+
+# **************************************************#
+# Check the input routine
+# **************************************************#
+def check_input_valid(input):
+    if input is not None:
+        if bad_input(input):
+            print(f"Input: {input} contains invalid characters!")
+            input = 'None'
+            Close()
+        else:
+            return input
+    else:
+        return input
+
+
 # **************************************************#
 # Update save Directory and filename of switch_List
 # **************************************************#
 
-
 def change_values(arg1, arg2):
     while not os.path.exists(arg1):
-        print("Der Pfad {0} ist nicht vorhanden.".format(arg1))
-        user_input = input(
-            "Geben Sie einen gültigen Pfad ein oder beenden Sie das Programm mit Q !\n"
-        )
+        print("Der Pfad: {0} ist nicht vorhanden.".format(arg1))
+        str1 = """Geben Sie einen gültigen Pfad ein \
+oder beenden Sie das Programm mit Q !\n"""
+
+        user_input = input({str1})
         if Quit(user_input):
             pass
         else:
@@ -28,14 +72,15 @@ def change_values(arg1, arg2):
 
     while not os.path.exists(arg2):
         # os.system("clear")
-        user_input = input(
-            "Geben Sie eine gültige Datei ein oder beenden Sie das Programm mit Q !\n"
-        )
+        str2 = "Geben Sie eine gültige Datei ein \
+oder beenden Sie das Programm mit Q !\n"
+        user_input = input(str2
+                           )
         if Quit(user_input):
             pass
         else:
             arg2 = user_input
-            print("Die Datei {0} ist vorhanden.".format(arg2))
+            #print("Die Datei: {0} ist vorhanden.".format(arg2))
 
     return [arg1, arg2]
 
@@ -46,7 +91,7 @@ def change_values(arg1, arg2):
 
 def Quit(arg1):
     if arg1.lower() == "q":
-        print("Programm wird beendet! ")
+        print("Closing Program immediately! ")
         sys.exit()
     else:
         return 0
@@ -59,7 +104,7 @@ def Quit(arg1):
 def check_reading(file_name):
     try:
         file = open(file_name, "r")
-        print(f"[+]... Reading file {file_name} was successfully")
+        print(f"[+]... Reading file '{file_name}' was successfully")
         file.close()
     except file.errors:
         print("Die Datei konnte nicht geöffnet werden.")
@@ -70,7 +115,7 @@ def check_reading(file_name):
 # **************************************************#
 
 
-def scp_authenticaten(zpath, file_name):
+def scp_authenticated(zpath, file_name):
     username = input("Geben Sie Ihren TACAS-Username ein!: ")
     password = getpass.getpass("Bitte geben Sie Ihr Passwort ein!: ")
     # password = input("Bitte geben Sie Ihr Passwort ein!: ")
@@ -99,27 +144,50 @@ def scp_authenticaten(zpath, file_name):
             line = line.strip()
             if line == "":
                 print(
-                    "[-] Keine Liste in File enthalten! Vorgang wird abgebrochen!")
+                    "[-] Keine Liste in File enthalten! \
+Vorgang wird abgebrochen!")
                 sys.exit()
             else:
                 if line.isalpha() and len(line) >= 0:
                     print(
-                        "[-] Leere Zeile in File enthalten! Vorgang wird abgebrochen!"
+                        "[-] Leere Zeile in File enthalten! \
+Vorgang wird abgebrochen!"
                     )
                     sys.exit()
                 else:
                     switch_name = line.strip()
                     if "/" in zpath:
-                        file = zpath+switch_name
+                        file = zpath + switch_name
                     else:
-                        file = zpath + "/"+switch_name
+                        file = zpath + "/" + switch_name
                     system = platform.system()
+                    target_file_name = "running-config"
                     if system == "Linux":
-                        command = f"sshpass -p {password} scp {username}@{switch_name}:running-config {file}_test.txt"
+                        command = f"sshpass -p {password} scp \
+{username}@{switch_name}:{target_file_name} {file}_test.txt"
+                        cmd = f"sshpass -p {password} \
+ssh {username}@{switch_name} test -e %s" % (
+                            target_file_name)
                     elif system == "Windows":
-                        command = f"scp {username}@{switch_name}:running-config  {file}_test.txt"
+                        command = f"scp {username}@{switch_name}:\
+running-config {file}_test.txt"
+                        cmd = f"ssh {username}@{switch_name} test -e %s" % (
+                            target_file_name)
                     else:
                         print("Unbekanntes Betriebssystem")
+                    try:
+                        # Check if target file is available
+
+                        if (os.system(cmd)):
+                            raise OSError("[-] Keine Zieldatei vorhanden")
+                        else:
+                            print(f"Die Datei {target_file_name} existiert!")
+                    except OSError:
+                        print(
+                            f"[-] Die Datei {target_file_name} existiert \
+nicht auf dem Zielhost!")
+                        print("[-] Command failed to excecute")
+                        sys.exit()
                     try:
                         # os.system('echo ' + password + ' | ' + command)
                         if os.system(command) != 0:
@@ -129,22 +197,27 @@ def scp_authenticaten(zpath, file_name):
                             print("[+] SSH Connection passed")
                             if os.path.isfile(f"{switch_name}_test.txt"):
                                 print(
-                                    "[+] Die Testdatei {switch_name}_test.txt ist bereits vorhanden!")
+                                    "[+] Die Testdatei {switch_name}_test.txt \
+ist bereits vorhanden!")
                                 break
                             else:
                                 print(
-                                    f"[+] Testfile: {switch_name}_test.txt wurde erstellt!")
+                                    f"[+] Testfile: {switch_name}_test.txt \
+wurde erstellt!")
                             ans = input(
-                                f"[?] Soll die Datei {switch_name}_test.txt gelöscht werden? Y/N\n")
+                                f"[?] Soll die Datei {switch_name}_test.txt \
+gelöscht werden? Y/N\n")
 
                             while check_input(ans):
                                 ans = input(
-                                    "[-] Falsche Eingabe!\n"f"Soll die Datei {switch_name}_test.txt beibehalten werden? Y/N\n")
+                                    "[-] Falsche Eingabe!\n"f"Soll die Datei \
+{switch_name}_test.txt beibehalten werden? Y/N\n")
                             if ans.lower() == "y":
                                 if "/" in zpath:
                                     file_save = zpath+switch_name+"_test.txt"
                                 else:
-                                    file_save = zpath + "/"+switch_name+"_test.txt"
+                                    file_save = zpath + "/\
+"+switch_name+"_test.txt"
                                 if os.path.isfile(file_save):
                                     os.remove(file_save)
                                 else:
@@ -152,6 +225,7 @@ def scp_authenticaten(zpath, file_name):
                             elif ans.lower() == "n":
                                 pass
                             break
+
                     except Exception:
                         print("[-] SSH Connection Authentication failed!")
                         print("[-] Command failed to excecute")
@@ -166,7 +240,7 @@ def scp_authenticaten(zpath, file_name):
 def config_save(zpath, file):
     # Check SSH Connection
     print("Checking the SCP Connection.....")
-    creds = scp_authenticaten(zpath, file)
+    creds = scp_authenticated(zpath, file)
     if creds == 0:
         sys.exit()
 
@@ -181,9 +255,11 @@ def config_save(zpath, file):
                 file = zpath + "/" + switch_name
             # print(switch_name)
             if switch_name:
-                # command = f"sshpass -p {creds[1]} scp -q {creds[0]}@{switch_name}:running-config  {zpath}/{file_name}.txt"
+                """# command = f"sshpass -p {creds[1]} scp -q \
+{creds[0]}@{switch_name}:running-config  {zpath}/{file_name}.txt"""
                 command = (
-                    f"scp -q {creds[0]}@{switch_name}:running-config {file}.txt")
+                    f"scp -q {creds[0]}@{switch_name}:running-config \
+{file}.txt")
                 if os.path.isfile(f"{file}.txt"):
                     print(f"[+] {switch_name}.txt bereits vorhanden!")
                     continue
@@ -199,11 +275,13 @@ def config_save(zpath, file):
 
                     if os.path.isfile(f"{file}.txt"):
                         print(
-                            f"[+] Die Datei {switch_name}.txt wurde erfolgreich heruntergeladen!"
+                            f"[+] Die Datei {switch_name}.txt \
+wurde erfolgreich heruntergeladen!"
                         )
                     else:
                         print(
-                            f"[-] Die Datei {switch_name}.txt konnte nicht heruntergeladen werden!"
+                            f"[-] Die Datei {switch_name}.txt \
+konnte nicht heruntergeladen werden!"
                         )
                         break
             else:
@@ -216,20 +294,19 @@ def config_save(zpath, file):
 
 def check_arguments(arg1, arg2):
     print("Überprüfung folgende Eingabe:\n")
-    print("[+] Zielpfad: {0}\nFilename: {1}\n".format(arg1, arg2))
+    print("[+] Zielpfad: {0}\n[+] Filename: {1}\n".format(arg1, arg2))
     check = False
 
-    # Prüfen, ob Parameter vorhanden sind
+    # Check if Path is available
     if not os.path.exists(arg1):
         return check
-
-    if not os.path.exists(arg2):
-        return check  # Pfad vorhanden
-
+    # Check if File is available
+    if not os.path.isfile(arg2):
+        return check
     check = True
 
-    print("[+] Der Pfad {0} ist vorhanden.".format(arg1))
-    print("[+] Die Datei {0} ist vorhanden.".format(arg2))
+    print("[+] Der Pfad '{0}' ist vorhanden.".format(arg1))
+    print("[+] Die Datei '{0}' ist vorhanden.".format(arg2))
 
     return check
 # **************************************************#
@@ -292,7 +369,8 @@ def argument_mode(arg1, arg2):
 
 def Menu(argv):
     print(
-        f"usage: {argv[0]} [-sd save director] [-sw_list Switch_liste]\nExample: python3 {argv[0]} -sd C:/user/path -sw_list test_file.txt\n"
+        f"""usage: {argv[0]} [-sd save director] [-sw_list Switch_liste]\n
+        Example: python3 {argv[0]} -sd C:/user/path -sw_list test_file.txt\n"""
     )
 
 
