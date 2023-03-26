@@ -1,3 +1,6 @@
+# Message text Class Box
+# Multiple print output comprise into a python Class
+
 class MessageBox:
     def __init__(self, name=None):
         self.error = "Program occurs an error! Closing Program now!"
