@@ -5,7 +5,7 @@ from Config_func import default_mode, finish, change_values,\
 import sys
 "# Python Script for saving the configs from all switch Series with a list"
 "# Created by Insomnia"
-"# Version 1.1.0"
+"# Version 1.1.1"
 
 '# Imports'
 version = "1.1.0"
