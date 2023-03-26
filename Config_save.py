@@ -37,7 +37,14 @@ def main():
         file = check_input_valid(file)
         default_mode(zpath, file)
 
-    if (args.save_director is not None and args.switch_list is None) or (args.save_director is None and args.switch_list is not None):
+    if (args.save_director is not None and args.switch_list is None):
+        zpath = check_input_valid(args.save_director)
+        file = check_input_valid(args.switch_list)
+        val = change_values(str(zpath), str(file))
+        zpath = val[0]
+        file = val[1]
+        argument_mode(zpath, file)
+    elif (args.save_director is None and args.switch_list is not None):
         zpath = check_input_valid(args.save_director)
         file = check_input_valid(args.switch_list)
         val = change_values(str(zpath), str(file))
