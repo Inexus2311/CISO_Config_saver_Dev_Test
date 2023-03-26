@@ -80,8 +80,7 @@ oder beenden Sie das Programm mit Q !\n"
             pass
         else:
             arg2 = user_input
-            #print("Die Datei: {0} ist vorhanden.".format(arg2))
-
+            print("Die Datei: {0} ist vorhanden.".format(arg2))
     return [arg1, arg2]
 
 
