@@ -1,6 +1,6 @@
 # CCNA Config_saver Python Script
 
-## Version 1.1.1
+## Version 1.2.1
 
 [![Build Status](https://travis-ci.org/joemccann/dillinger.svg?branch=master)](https://github.com/Inexus2311)
 
@@ -15,7 +15,7 @@
 - Manual or argumentative input of the target path and the switch list
 - Checking SQL Injections and bad Characters and close the program directly
 - Checking runing-config is available on target host
-
+- Create or skip Test Config file to check if scp connection is available
 # Help
 
 > usage: python3 Config_save.py [-sd Savedirectory][-sw_list switch_list + file extension]
