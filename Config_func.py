@@ -96,6 +96,21 @@ def Quit(arg1):
         return 0
 
 # **************************************************#
+# Check input_answer
+# **************************************************#
+# function check_input check input if it is Y or N then return true else return false
+
+
+def check_input(input_answer):
+    if input_answer is not None:
+        if input_answer.lower() == "y":
+            return True
+        elif input_answer.lower() == "n":
+            return True
+        else:
+            return False
+
+# **************************************************#
 # Check if a file can be reading
 # **************************************************#
 
@@ -188,42 +203,53 @@ nicht auf dem Zielhost!")
                         print("[-] Command failed to excecute")
                         sys.exit()
                     try:
-                        # os.system('echo ' + password + ' | ' + command)
-                        if os.system(command) != 0:
-                            raise Exception(
-                                "[-] SSH Authentication failed!")
-                        else:
-                            print("[+] SSH Connection passed")
-                            if os.path.isfile(f"{switch_name}_test.txt"):
-                                print(
-                                    "[+] Die Testdatei {switch_name}_test.txt \
-ist bereits vorhanden!")
-                                break
-                            else:
-                                print(
-                                    f"[+] Testfile: {switch_name}_test.txt \
-wurde erstellt!")
-                            ans = input(
-                                f"[?] Soll die Datei {switch_name}_test.txt \
-gelöscht werden? Y/N\n")
+                        input_answer = input(
+                            "Should be create a switch test config ? Y/N : ")
+                        # while checking the input_answer until your input_answer is  Y or N
+                        while check_input(input_answer):
+                            input_answer = input(
+                                "[-] Falsche Eingabe! Y/N: "
+                            )
+                        if input_answer.lower() == 'y':
 
-                            while check_input(ans):
+                            # os.system('echo ' + password + ' | ' + command)
+                            if os.system(command) != 0:
+                                raise Exception(
+                                    "[-] SSH Authentication failed!")
+                            else:
+                                print("[+] SSH Connection passed")
+                                if os.path.isfile(f"{switch_name}_test.txt"):
+                                    print(
+                                        "[+] Die Testdatei {switch_name}_test.txt \
+    ist bereits vorhanden!")
+                                    break
+                                else:
+                                    print(
+                                        f"[+] Testfile: {switch_name}_test.txt \
+    wurde erstellt!")
                                 ans = input(
-                                    "[-] Falsche Eingabe!\n"f"Soll die Datei \
-{switch_name}_test.txt beibehalten werden? Y/N\n")
-                            if ans.lower() == "y":
-                                if "/" in zpath:
-                                    file_save = zpath+switch_name+"_test.txt"
-                                else:
-                                    file_save = zpath + "/\
-"+switch_name+"_test.txt"
-                                if os.path.isfile(file_save):
-                                    os.remove(file_save)
-                                else:
-                                    print("[-] File not found!")
-                            elif ans.lower() == "n":
-                                pass
-                            break
+                                    f"[?] Soll die Datei {switch_name}_test.txt \
+    gelöscht werden? Y/N\n")
+
+                                while check_input(ans):
+                                    ans = input(
+                                        "[-] Falsche Eingabe!\n"f"Soll die Datei \
+    {switch_name}_test.txt beibehalten werden? Y/N: ")
+                                if ans.lower() == "y":
+                                    if "/" in zpath:
+                                        file_save = zpath+switch_name+"_test.txt"
+                                    else:
+                                        file_save = zpath + "/\
+    "+switch_name+"_test.txt"
+                                    if os.path.isfile(file_save):
+                                        os.remove(file_save)
+                                    else:
+                                        print("[-] File not found!")
+                                elif ans.lower() == "n":
+                                    pass
+                                break
+                        else:
+                            print("Switch test config was skipped!")
 
                     except Exception:
                         print("[-] SSH Connection Authentication failed!")
