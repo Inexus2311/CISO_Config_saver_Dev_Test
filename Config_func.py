@@ -181,7 +181,7 @@ Vorgang wird abgebrochen!"
                         target_file_name = "running-config"
                         if system == "Linux":
                             command = f"sshpass -p {password} scp \
-        {username}@{switch_name}:{target_file_name} {file}_test.txt"
+        {username}@{switch_name}:{target_file_name} {switch_name}_test.txt"
                             cmd = f"sshpass -p {password} \
         ssh {username}@{switch_name}" + ' dir ' + "%s" % (
                                 target_file_name)
