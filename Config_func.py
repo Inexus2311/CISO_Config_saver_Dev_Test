@@ -73,11 +73,7 @@ oder beenden Sie das Programm mit Q : "
     while not os.path.exists(arg2):
         # os.system("clear")
         str2 = "Geben Sie eine gültige Datei ein \
-<<<<<<< HEAD
-oder beenden Sie das Programm mit Q !\n"
-=======
-oder beenden Sie das Programm mit Q: "
->>>>>>> dev_insomnia
+oder beenden Sie das Programm mit Q :"
         user_input = input(str2)
         if Quit(user_input):
             pass
