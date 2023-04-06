@@ -225,19 +225,21 @@ Vorgang wird abgebrochen!"
                             print("[+] SSH Connection passed")
                             if os.path.isfile(f"{switch_name}_test.txt"):
                                 print(
-<<<<<<< HEAD
+<< << << < HEAD
                                     "[+] Die Testdatei {switch_name}_test.txt \
 ist bereits vorhanden!")
                                 break
-=======
+
+
+== == == =
                                     f"[+] Die Testdatei {switch_name}_test.txt \
 wurde erstellt!")
->>>>>>> dev_insomnia
+>> >>>> > dev_insomnia
                             else:
                                 print(
                                     f"[+] Testfile: {switch_name}_test.txt \
 wurde erstellt!")
-                            ans = input(
+                            ans=input(
                                 f"[?] Soll die Datei {switch_name}_test.txt \
 gelöscht werden? Y/N: ")
 
