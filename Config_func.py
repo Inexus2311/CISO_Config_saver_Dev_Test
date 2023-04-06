@@ -5,6 +5,7 @@ import sys
 import os
 import argparse
 '# import paramiko'
+import subprocess
 
 # Menu mode
 # mode = ""
@@ -61,10 +62,10 @@ def check_input_valid(input):
 def change_values(arg1, arg2):
     while not os.path.exists(arg1):
         print("Der Pfad: {0} ist nicht vorhanden.".format(arg1))
-        str1 = """Geben Sie einen gültigen Pfad ein \
-oder beenden Sie das Programm mit Q !\n"""
+        str1 = "Geben Sie einen gültigen Pfad ein \
+oder beenden Sie das Programm mit Q : "
 
-        user_input = input({str1})
+        user_input = input(str1)
         if Quit(user_input):
             pass
         else:
@@ -73,9 +74,8 @@ oder beenden Sie das Programm mit Q !\n"""
     while not os.path.exists(arg2):
         # os.system("clear")
         str2 = "Geben Sie eine gültige Datei ein \
-oder beenden Sie das Programm mit Q !\n"
-        user_input = input(str2
-                           )
+oder beenden Sie das Programm mit Q: "
+        user_input = input(str2)
         if Quit(user_input):
             pass
         else:
@@ -169,44 +169,53 @@ Vorgang wird abgebrochen!"
                     )
                     sys.exit()
                 else:
-                    switch_name = line.strip()
-                    if "/" in zpath:
-                        file = zpath + switch_name
-                    else:
-                        file = zpath + "/" + switch_name
-                    system = platform.system()
-                    target_file_name = "running-config"
-                    if system == "Linux":
-                        command = f"sshpass -p {password} scp \
-{username}@{switch_name}:{target_file_name} {file}_test.txt"
-                        cmd = f"sshpass -p {password} \
-ssh {username}@{switch_name} test -e %s" % (
-                            target_file_name)
-                    elif system == "Windows":
-                        command = f"scp {username}@{switch_name}:\
-running-config {file}_test.txt"
-                        cmd = f"ssh {username}@{switch_name} test -e %s" % (
-                            target_file_name)
-                    else:
-                        print("Unbekanntes Betriebssystem")
-                    try:
-                        # Check if target file is available
+                    # Check target_file is available on the system
+                    input_answer = input(
+                        "Should the running-config be checked on the target system? (Y/N): ")
+                    if check_input(input_answer):
 
-                        if (os.system(cmd)):
-                            raise OSError("[-] Keine Zieldatei vorhanden")
+                        switch_name = line.strip()
+                        if "/" in zpath:
+                            file = zpath + switch_name
                         else:
-                            print(f"Die Datei {target_file_name} existiert!")
-                    except OSError:
+                            file = zpath + "/" + switch_name
+                        system = platform.system()
+                        target_file_name = "running-config"
+                        if system == "Linux":
+                            command = f"sshpass -p {password} scp \
+        {username}@{switch_name}:{target_file_name} {file}_test.txt"
+                            cmd = f"sshpass -p {password} \
+        ssh {username}@{switch_name}" + ' dir ' + "%s" % (
+                                target_file_name)
+                        elif system == "Windows":
+                            command = f"scp {username}@{switch_name}:{target_file_name} {switch_name}_test.txt"
+                            # cmd = f"scp {username}@{switch_name}:%s {switch_name}_test.txt" % (
+                            #    target_file_name)
+                            # Execute command to check the presence of file
+                            cmd = 'ssh '+username+'@'+switch_name + ' dir ' + target_file_name
+                        else:
+                            print("Unbekanntes Betriebssystem")
+                        try:
+                            # Check if target file is available
+                            if (os.system(cmd)):
+                                raise OSError("[-] Keine Zieldatei vorhanden")
+                            else:
+                                print(
+                                    f"Die Datei {target_file_name} existiert!")
+                        except OSError:
+                            print(
+                                f"[-] Die Datei {target_file_name} existiert \
+        nicht auf dem Zielhost!")
+                            print("[-] Command failed to excecute")
+                            sys.exit()
+                    else:
                         print(
-                            f"[-] Die Datei {target_file_name} existiert \
-nicht auf dem Zielhost!")
-                        print("[-] Command failed to excecute")
-                        sys.exit()
+                            "[-] Checking running-config on target system was skipped!")
                     try:
                         input_answer = input(
                             "Should be create a switch test config ? Y/N : ")
                         # while checking the input_answer until your input_answer is  Y or N
-                        while check_input(input_answer):
+                        while check_File_input(input_answer):
                             input_answer = input(
                                 "[-] Falsche Eingabe! Y/N: "
                             )
@@ -231,7 +240,7 @@ nicht auf dem Zielhost!")
                                     f"[?] Soll die Datei {switch_name}_test.txt \
     gelöscht werden? Y/N\n")
 
-                                while check_input(ans):
+                                while check_File_input(ans):
                                     ans = input(
                                         "[-] Falsche Eingabe!\n"f"Soll die Datei \
     {switch_name}_test.txt beibehalten werden? Y/N: ")
@@ -265,6 +274,7 @@ nicht auf dem Zielhost!")
 def config_save(zpath, file):
     # Check SSH Connection
     print("Checking the SCP Connection.....")
+    target_file_name = "running-config"
     creds = scp_authenticated(zpath, file)
     if creds == 0:
         sys.exit()
@@ -281,9 +291,9 @@ def config_save(zpath, file):
             # print(switch_name)
             if switch_name:
                 """# command = f"sshpass -p {creds[1]} scp -q \
-{creds[0]}@{switch_name}:running-config  {zpath}/{file_name}.txt"""
+{creds[0]}@{switch_name}:{target_file_name}  {zpath}/{file_name}.txt"""
                 command = (
-                    f"scp -q {creds[0]}@{switch_name}:running-config \
+                    f"scp -q {creds[0]}@{switch_name}:{target_file_name} \
 {file}.txt")
                 if os.path.isfile(f"{file}.txt"):
                     print(f"[+] {switch_name}.txt bereits vorhanden!")
@@ -411,11 +421,11 @@ def parse_args():
     return args
 
 # **************************************************#
-# Check your Inputs
+# Check File input routine
 # **************************************************#
 
 
-def check_input(ans):
+def check_File_input(ans):
     if ans.lower() == 'y':
         return False
     elif ans.lower() == 'n':
