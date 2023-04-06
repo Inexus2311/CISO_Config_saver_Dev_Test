@@ -74,8 +74,7 @@ oder beenden Sie das Programm mit Q !\n"""
         # os.system("clear")
         str2 = "Geben Sie eine gültige Datei ein \
 oder beenden Sie das Programm mit Q !\n"
-        user_input = input(str2
-                           )
+        user_input = input(str2)
         if Quit(user_input):
             pass
         else:
