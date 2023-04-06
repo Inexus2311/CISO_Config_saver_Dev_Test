@@ -73,7 +73,7 @@ oder beenden Sie das Programm mit Q : "
     while not os.path.exists(arg2):
         # os.system("clear")
         str2 = "Geben Sie eine gültige Datei ein \
-oder beenden Sie das Programm mit Q :"
+oder beenden Sie das Programm mit Q : "
         user_input = input(str2)
         if Quit(user_input):
             pass
@@ -105,7 +105,7 @@ def check_input(input_answer):
         if input_answer.lower() == "y":
             return True
         elif input_answer.lower() == "n":
-            return True
+            return False
         else:
             return False
 
@@ -168,100 +168,98 @@ Vorgang wird abgebrochen!"
                     )
                     sys.exit()
                 else:
+                    switch_name = line.strip()
+                    system = platform.system()
+                    target_file_name = "running-config"
+                    if "/" in zpath:
+                        file = zpath + switch_name
+                    else:
+                        file = zpath + "/" + switch_name
+                    if system == "Linux":
+                        command = f"sshpass -p {password} scp \
+        {username}@{switch_name}:{target_file_name} {file}_test.txt"
+                        cmd = f"sshpass -p {password} \
+        ssh {username}@{switch_name}" + ' dir ' + "%s" % (
+                            target_file_name)
+                    elif system == "Windows":
+                        command = f"scp {username}@{switch_name}:{target_file_name} {file}_test.txt"
+                        # cmd = f"scp {username}@{switch_name}:%s {switch_name}_test.txt" % (
+                        #    target_file_name)
+                        # Execute command to check the presence of file
+                        cmd = 'ssh '+username+'@'+switch_name + ' dir ' + target_file_name
+                    else:
+                        print("Unbekanntes Betriebssystem")
+                try:
                     # Check target_file is available on the system
                     input_answer = input(
                         "Should the running-config be checked on the target system? (Y/N): ")
-                    if check_File_input(input_answer):
-                        switch_name = line.strip()
-                        if "/" in zpath:
-                            file = zpath + switch_name
+                    if check_input(input_answer):
+                        # Check if target file is available
+                        if (os.system(cmd)):
+                            raise OSError("[-] Keine Zieldatei vorhanden")
                         else:
-                            file = zpath + "/" + switch_name
-                        system = platform.system()
-                        target_file_name = "running-config"
-                        if system == "Linux":
-                            command = f"sshpass -p {password} scp \
-        {username}@{switch_name}:{target_file_name} {file}_test.txt"
-                            cmd = f"sshpass -p {password} \
-        ssh {username}@{switch_name}" + ' dir ' + "%s" % (
-                                target_file_name)
-                        elif system == "Windows":
-                            command = f"scp {username}@{switch_name}:{target_file_name} {file}_test.txt"
-                            # cmd = f"scp {username}@{switch_name}:%s {switch_name}_test.txt" % (
-                            #    target_file_name)
-                            # Execute command to check the presence of file
-                            cmd = 'ssh '+username+'@'+switch_name + ' dir ' + target_file_name
-                        else:
-                            print("Unbekanntes Betriebssystem")
-                        try:
-                            # Check if target file is available
-                            if (os.system(cmd)):
-                                raise OSError("[-] Keine Zieldatei vorhanden")
-                            else:
-                                print(
-                                    f"Die Datei {target_file_name} existiert!")
-                        except OSError:
-                            print(
-                                f"[-] Die Datei {target_file_name} existiert \
-nicht auf dem Zielhost!")
-                            print("[-] Command failed to excecute")
-                            sys.exit()
+                            print(f"Die Datei {target_file_name} existiert!")
                     else:
                         print(
                             "[-] Checking running-config on target system was skipped!")
-                    try:
+                except OSError:
+                    print(f"[-] Die Datei {target_file_name} existiert \
+    nicht auf dem Zielhost!")
+                    print("[-] Command failed to excecute")
+                    sys.exit()
+                try:
+                    input_answer = input(
+                        "Should be create a switch test config ? Y/N : ")
+                    # while checking the input_answer until your input_answer is  Y or N
+                    while check_File_input(input_answer):
                         input_answer = input(
-                            "Should be create a switch test config ? Y/N : ")
-                        # while checking the input_answer until your input_answer is  Y or N
-                        while check_File_input(input_answer):
-                            input_answer = input(
-                                "[-] Falsche Eingabe! Y/N: "
-                            )
-                        if input_answer.lower() == 'y':
+                            "[-] Falsche Eingabe! Y/N: "
+                        )
+                    if input_answer.lower() == 'y':
 
-                            # os.system('echo ' + password + ' | ' + command)
-                            if os.system(command) != 0:
-                                raise Exception(
-                                    "[-] SSH Authentication failed!")
-                            else:
-                                print("[+] SSH Connection passed")
-                                if os.path.isfile(f"{switch_name}_test.txt"):
-                                    print(
-                                        "[+] Die Testdatei {switch_name}_test.txt \
-    ist bereits vorhanden!")
-                                    break
-                                else:
-                                    print(
-                                        f"[+] Testfile: {switch_name}_test.txt \
-    wurde erstellt!")
-                                ans = input(
-                                    f"[?] Soll die Datei {switch_name}_test.txt \
-    gelöscht werden? Y/N\n")
-
-                                while check_File_input(ans):
-                                    ans = input(
-                                        "[-] Falsche Eingabe!\n"f"Soll die Datei \
-    {switch_name}_test.txt beibehalten werden? Y/N: ")
-                                if ans.lower() == "y":
-                                    if "/" in zpath:
-                                        file_save = zpath+switch_name+"_test.txt"
-                                    else:
-                                        file_save = zpath + "/\
-    "+switch_name+"_test.txt"
-                                    if os.path.isfile(file_save):
-                                        os.remove(file_save)
-                                    else:
-                                        print("[-] File not found!")
-                                elif ans.lower() == "n":
-                                    pass
-                                break
+                        # os.system('echo ' + password + ' | ' + command)
+                        if os.system(command) != 0:
+                            raise Exception(
+                                "[-] SSH Authentication failed!")
                         else:
-                            print("Switch test config was skipped!")
+                            print("[+] SSH Connection passed")
+                            if os.path.isfile(f"{switch_name}_test.txt"):
+                                print(
+                                    "[+] Die Testdatei {switch_name}_test.txt \
+ist bereits vorhanden!")
+                                break
+                            else:
+                                print(
+                                    f"[+] Testfile: {switch_name}_test.txt \
+wurde erstellt!")
+                            ans = input(
+                                f"[?] Soll die Datei {switch_name}_test.txt \
+gelöscht werden? Y/N: ")
 
-                    except Exception:
-                        print("[-] SSH Connection Authentication failed!")
-                        print("[-] Command failed to excecute")
-                        sys.exit()
+                            while check_File_input(ans):
+                                ans = input(
+                                    "[-] Falsche Eingabe!\n"f"Soll die Datei \
+    {switch_name}_test.txt beibehalten werden? Y/N: ")
+                            if ans.lower() == "y":
+                                if "/" in zpath:
+                                    file_save = file+"_test.txt"
+                                else:
+                                    file_save = zpath+"/"+switch_name+"_test.txt"
+                                if os.path.isfile(file_save):
+                                    os.remove(file_save)
+                                else:
+                                    print("[-] File not found!")
+                            elif ans.lower() == "n":
+                                pass
+                            break
+                    else:
+                        print("Switch test config was skipped!")
+
+                except Exception:
+                    print("[-] SSH Connection Authentication failed!")
+                    print("[-] Command failed to excecute")
+                    sys.exit()
+
     return [username, password]
 
 # **************************************************#
