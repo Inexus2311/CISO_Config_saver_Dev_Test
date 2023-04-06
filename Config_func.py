@@ -5,7 +5,6 @@ import sys
 import os
 import argparse
 '# import paramiko'
-import subprocess
 
 # Menu mode
 # mode = ""
