@@ -171,8 +171,7 @@ Vorgang wird abgebrochen!"
                     # Check target_file is available on the system
                     input_answer = input(
                         "Should the running-config be checked on the target system? (Y/N): ")
-                    if check_input(input_answer):
-
+                    if check_File_input(input_answer):
                         switch_name = line.strip()
                         if "/" in zpath:
                             file = zpath + switch_name
@@ -204,7 +203,7 @@ Vorgang wird abgebrochen!"
                         except OSError:
                             print(
                                 f"[-] Die Datei {target_file_name} existiert \
-        nicht auf dem Zielhost!")
+nicht auf dem Zielhost!")
                             print("[-] Command failed to excecute")
                             sys.exit()
                     else:
