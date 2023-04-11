@@ -193,7 +193,11 @@ Vorgang wird abgebrochen!"
                     # Check target_file is available on the system
                     input_answer = input(
                         "Should the running-config be checked on the target system? (Y/N): ")
-                    if check_input(input_answer):
+                    while check_File_input(input_answer):
+                        input_answer = input(
+                            "[-] Falsche Eingabe! Y/N: "
+                        )
+                    if input_answer == 'y':
                         # Check if target file is available
                         if (os.system(cmd)):
                             raise OSError("[-] Keine Zieldatei vorhanden")
@@ -254,6 +258,7 @@ gelöscht werden? Y/N: ")
                             break
                     else:
                         print("Switch test config was skipped!")
+                        break
 
                 except Exception:
                     print("[-] SSH Connection Authentication failed!")
