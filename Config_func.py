@@ -197,7 +197,7 @@ Vorgang wird abgebrochen!"
                         input_answer = input(
                             "[-] Falsche Eingabe! Y/N: "
                         )
-                    if input_answer== 'y':
+                    if input_answer == 'y':
                         # Check if target file is available
                         if (os.system(cmd)):
                             raise OSError("[-] Keine Zieldatei vorhanden")
